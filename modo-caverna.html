@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modo Caverna 🦅</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --surface3: #222222;
+    --border: #2a2a2a;
+    --gold: #c9a84c;
+    --gold-dim: #7a6430;
+    --green: #4caf74;
+    --red: #c94c4c;
+    --blue: #4c8fc9;
+    --text: #e8e8e8;
+    --text-dim: #666;
+    --text-muted: #444;
+    --accent: #c9a84c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 24px 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .logo span {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .week-badge {
+    text-align: right;
+  }
+
+  .week-badge .week-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    color: var(--surface3);
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .week-badge .week-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* LEVEL BAR */
+  .level-section {
+    margin: 20px 24px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .level-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--gold);
+  }
+
+  .level-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .level-pts span {
+    color: var(--gold);
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  .progress-track {
+    background: var(--surface3);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .level-milestones {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .milestone {
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-align: center;
+  }
+
+  .milestone.active { color: var(--gold); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 16px 24px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 16px 24px 100px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* DAY SELECTOR */
+  .day-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .day-selector::-webkit-scrollbar { display: none; }
+
+  .day-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 56px;
+  }
+
+  .day-btn.active {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .day-btn.active .day-name, .day-btn.active .day-pts { color: var(--bg); }
+
+  .day-btn.completed { border-color: var(--green); }
+  .day-btn.completed .day-name { color: var(--green); }
+
+  .day-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .day-pts {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* TASK BLOCKS */
+  .block-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin: 20px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .block-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .task-item:active { transform: scale(0.98); }
+
+  .task-item.done {
+    border-color: var(--green);
+    background: rgba(76, 175, 116, 0.05);
+  }
+
+  .task-item.done .task-name { text-decoration: line-through; color: var(--text-dim); }
+
+  .task-item.fail {
+    border-color: var(--red);
+    background: rgba(201, 76, 76, 0.05);
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 12px;
+  }
+
+  .task-item.done .checkbox {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .task-item.fail .checkbox {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+
+  .task-info { flex: 1; }
+
+  .task-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .task-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .task-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .task-item.done .task-pts { color: var(--green); }
+  .task-item.fail .task-pts { color: var(--red); }
+
+  /* DAY SCORE */
+  .day-score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .score-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .score-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .score-max {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .day-ring {
+    position: relative;
+    width: 64px;
+    height: 64px;
+  }
+
+  .day-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  .day-ring-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* WEEK OVERVIEW */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .week-day-cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 6px;
+    text-align: center;
+  }
+
+  .week-day-cell.has-pts { border-color: var(--gold-dim); }
+  .week-day-cell.full { border-color: var(--green); }
+
+  .wdc-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .wdc-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+
+  .week-total-card {
+    background: var(--surface);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .week-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .week-total-pts {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .week-total-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .week-next-level {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .week-next-level span { color: var(--gold); }
+
+  /* BOOKS */
+  .book-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-items: flex-start;
+  }
+
+  .book-item.reading { border-color: var(--gold); }
+  .book-item.done-book { border-color: var(--green); opacity: 0.7; }
+
+  .book-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: var(--text-muted);
+    line-height: 1;
+    min-width: 28px;
+    margin-top: 2px;
+  }
+
+  .book-item.reading .book-num { color: var(--gold); }
+  .book-item.done-book .book-num { color: var(--green); }
+
+  .book-info { flex: 1; }
+
+  .book-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .book-item.done-book .book-title { text-decoration: line-through; color: var(--text-dim); }
+
+  .book-author {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .book-tag {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 6px;
+    display: inline-block;
+  }
+
+  .book-tag.reading { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .book-tag.next { background: rgba(76,143,201,0.15); color: var(--blue); }
+  .book-tag.buy { background: rgba(76,175,116,0.15); color: var(--green); }
+  .book-tag.done-tag { background: rgba(76,175,116,0.1); color: var(--green); }
+
+  .book-quiz-btn {
+    padding: 6px 12px;
+    background: var(--gold);
+    color: var(--bg);
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* PODCASTS */
+  .podcast-item {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+
+  .podcast-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .podcast-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .podcast-category {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .cat-vendas { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .cat-negocios { background: rgba(76,143,201,0.15); color: var(--blue); }
+  .cat-tech { background: rgba(76,175,116,0.15); color: var(--green); }
+  .cat-mente { background: rgba(201,76,76,0.15); color: var(--red); }
+  .cat-semana { background: rgba(201,168,76,0.3); color: var(--gold); border: 1px solid var(--gold); }
+
+  .podcast-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .podcast-ep {
+    font-size: 11px;
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    margin-top: 6px;
+  }
+
+  /* STREAK */
+  .streak-banner {
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.03));
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .streak-fire {
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .streak-info {}
+  .streak-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .streak-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* FLOATING TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--gold);
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .stat-lbl {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 3px;
+    color: var(--text);
+  }
+
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  /* SEPARATOR */
+  .sep {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    MODO<br>CAVERNA
+    <span>90 DIAS — SEMANA <span id="currentWeek">1</span></span>
+  </div>
+  <div class="week-badge">
+    <div class="week-num">90</div>
+    <div class="week-label">dias restantes</div>
+  </div>
+</div>
+
+<!-- LEVEL -->
+<div class="level-section">
+  <div class="level-header">
+    <div class="level-name" id="levelName">🪖 SOLDADO</div>
+    <div class="level-pts"><span id="totalPts">0</span> pts</div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="levelBar" style="width: 0%"></div>
+  </div>
+  <div class="level-milestones">
+    <div class="milestone active">SOLDADO<br>266+</div>
+    <div class="milestone" id="m2">GUERREIRO<br>304+</div>
+    <div class="milestone" id="m3">ESTRATEGISTA<br>323+</div>
+    <div class="milestone" id="m4">CAVERNA<br>342+</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('hoje')">Hoje</button>
+  <button class="tab" onclick="switchTab('semana')">Semana</button>
+  <button class="tab" onclick="switchTab('livros')">Livros</button>
+  <button class="tab" onclick="switchTab('podcasts')">Podcasts</button>
+</div>
+
+<div class="content">
+
+  <!-- HOJE -->
+  <div id="tab-hoje" class="tab-panel active">
+
+    <div class="day-selector" id="daySelector"></div>
+
+    <div class="day-score-card">
+      <div>
+        <div class="score-label">Pontos hoje</div>
+        <div class="score-value" id="dayScore">0</div>
+        <div class="score-max">de <span id="dayMax">0</span> possíveis</div>
+      </div>
+      <div class="day-ring">
+        <svg width="64" height="64">
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#222" stroke-width="5"/>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#c9a84c" stroke-width="5"
+            stroke-dasharray="163" stroke-dashoffset="163" id="ringCircle"
+            stroke-linecap="round" style="transition: stroke-dashoffset 0.6s ease"/>
+        </svg>
+        <div class="day-ring-label" id="ringPct">0%</div>
+      </div>
+    </div>
+
+    <div id="taskList"></div>
+
+  </div>
+
+  <!-- SEMANA -->
+  <div id="tab-semana" class="tab-panel">
+
+    <div class="streak-banner">
+      <div class="streak-fire">🔥</div>
+      <div class="streak-info">
+        <div class="streak-num" id="streakNum">1</div>
+        <div class="streak-label">dias seguidos</div>
+      </div>
+    </div>
+
+    <div class="week-grid" id="weekGrid"></div>
+
+    <div class="week-total-card">
+      <div class="week-total-row">
+        <div>
+          <div class="week-total-label">Total da semana</div>
+          <div class="week-total-pts" id="weekTotalPts">0</div>
+        </div>
+        <div style="text-align:right">
+          <div class="week-total-label">Nível atual</div>
+          <div style="font-family:'Bebas Neue';font-size:22px;color:var(--gold);letter-spacing:2px" id="weekLevel">🪖 SOLDADO</div>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="weekBar" style="width:0%"></div>
+      </div>
+      <div class="week-next-level" style="margin-top:8px" id="weekNextLabel">Faltam <span>266</span> pts para Soldado</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="statAcademia">0</div>
+        <div class="stat-lbl">Academia</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statLeitura">0</div>
+        <div class="stat-lbl">Leitura</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statMilagre">0</div>
+        <div class="stat-lbl">Milagre</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="statFamilia">0</div>
+        <div class="stat-lbl">Família</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statClean">0</div>
+        <div class="stat-lbl">Limpo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statPodcast">0</div>
+        <div class="stat-lbl">Podcast</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LIVROS -->
+  <div id="tab-livros" class="tab-panel">
+
+    <div class="section-header">
+      <div class="section-title">LENDO AGORA</div>
+    </div>
+
+    <div id="bookReading"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">FILA DE LEITURA</div>
+      <div class="section-count" id="bookQueueCount"></div>
+    </div>
+
+    <div id="bookQueue"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">COMPRAR</div>
+    </div>
+
+    <div id="bookBuy"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">LIDOS</div>
+      <div class="section-count" id="bookDoneCount">0 livros</div>
+    </div>
+
+    <div id="bookDone">
+      <div class="empty-state">Nenhum livro finalizado ainda.<br>Bora mudar isso. 📚</div>
+    </div>
+
+  </div>
+
+  <!-- PODCASTS -->
+  <div id="tab-podcasts" class="tab-panel">
+
+    <div class="section-header">
+      <div class="section-title">ESSA SEMANA</div>
+    </div>
+    <div id="podcastWeek"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">VENDAS & COMUNICAÇÃO</div>
+    </div>
+    <div id="podcastVendas"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">NEGÓCIOS & EMPREENDEDORISMO</div>
+    </div>
+    <div id="podcastNegocios"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">TECNOLOGIA & INOVAÇÃO</div>
+    </div>
+    <div id="podcastTech"></div>
+
+    <div class="sep"></div>
+
+    <div class="section-header">
+      <div class="section-title">MENTE & COMPORTAMENTO</div>
+    </div>
+    <div id="podcastMente"></div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA =====
+const DAYS = ['SEG','TER','QUA','QUI','SEX','SÁB','DOM'];
+const DAY_NAMES = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+
+const TASKS_TEMPLATE = [
+  // Inegociáveis diários
+  { id: 'milagre', name: 'Milagre da Manhã', meta: '06:00 — 40 min', pts: 8, block: 'INEGOCIÁVEIS', emoji: '🌅', daily: true },
+  { id: 'cafe', name: 'Café com Duda', meta: '06:40 — 20 min', pts: 0, block: 'INEGOCIÁVEIS', emoji: '☕', daily: true },
+  { id: 'academia', name: 'Academia', meta: '17:00 — 1h', pts: 10, block: 'INEGOCIÁVEIS', emoji: '🏋️', daily: true, skip: [5] },
+  { id: 'familia', name: 'Família respeitada', meta: 'A partir das 19h', pts: 8, block: 'INEGOCIÁVEIS', emoji: '👨‍👩‍👦', daily: true },
+  { id: 'clean', name: 'Sem pornografia', meta: 'Dia limpo ✊', pts: 15, block: 'INEGOCIÁVEIS', emoji: '🧠', daily: true },
+
+  // Leitura em blocos
+  { id: 'leitura1', name: 'Leitura — Bloco 1', meta: '30 min', pts: 5, block: 'LEITURA (2H/DIA)', emoji: '📖', daily: true },
+  { id: 'leitura2', name: 'Leitura — Bloco 2', meta: '30 min', pts: 5, block: 'LEITURA (2H/DIA)', emoji: '📖', daily: true },
+  { id: 'leitura3', name: 'Leitura — Bloco 3', meta: '30 min', pts: 0, block: 'LEITURA (2H/DIA)', emoji: '📖', daily: true },
+  { id: 'leitura4', name: 'Leitura — Bloco 4', meta: '30 min — total: 2h ✅ +10pts', pts: 0, block: 'LEITURA (2H/DIA)', emoji: '📖', daily: true },
+
+  // Podcast
+  { id: 'podcast', name: 'Podcast no deslocamento', meta: '30 min ida + 30 min volta', pts: 3, block: 'DESENVOLVIMENTO', emoji: '🎧', daily: true, skip: [5,6] },
+
+  // Semanais por dia
+  { id: 'treinamento', name: 'Treinamento da equipe', meta: '1h — SDRs', pts: 7, block: 'EQUIPE', emoji: '👥', days: [0,1] },
+  { id: 'gravacao_bloco', name: 'Gravação em bloco (2-3 vídeos)', meta: 'Escritório — alta energia', pts: 0, block: 'CONTEÚDO', emoji: '🎥', days: [0] },
+  { id: 'gravacao_noite', name: 'Gravação noturna (1-2 vídeos)', meta: 'Cenário em casa', pts: 0, block: 'CONTEÚDO', emoji: '🎥', days: [4] },
+  { id: 'debate', name: 'Debate do livro comigo', meta: 'Claude — insight p/ conteúdo', pts: 10, block: 'DESENVOLVIMENTO', emoji: '🧠', days: [2] },
+  { id: 'planejamento', name: 'Planejamento semanal', meta: 'Domingo — definir semana + conteúdo', pts: 10, block: 'ESTRATÉGIA', emoji: '📅', days: [6] },
+];
+
+const BOOKS = {
+  reading: [
+    { title: 'SPIN Selling', author: 'Neil Rackham', note: 'Lendo agora' },
+  ],
+  queue: [
+    { title: 'Nação Dopamina', author: 'Anna Lembke', note: 'Urgente — dopamina e hábitos' },
+    { title: 'Hábitos Atômicos', author: 'James Clear', note: 'Sustenta os 90 dias' },
+    { title: 'Este Barco Também é Seu', author: '', note: 'Você pediu logo' },
+    { title: 'Como Fazer Amigos e Influenciar Pessoas', author: 'Dale Carnegie', note: 'Ouvir mais, falar menos' },
+    { title: 'A Mente do Empreendedor', author: '', note: '' },
+    { title: 'Receita Previsível', author: 'Aaron Ross', note: '' },
+    { title: 'Poder e Alta Performance', author: '', note: '' },
+    { title: 'Segredos para ser um Palestrante de Sucesso', author: '', note: '' },
+    { title: 'Ponto de Inflexão', author: '', note: '' },
+    { title: 'Influência', author: 'Joel Jota', note: '' },
+    { title: '48 Leis do Poder', author: 'Robert Greene', note: '' },
+    { title: 'Bíblia de Vendas', author: '', note: '' },
+  ],
+  buy: [
+    { title: 'Never Split the Difference', author: 'Chris Voss', note: 'Negociação e escuta ativa' },
+    { title: 'O Obstáculo é o Caminho', author: 'Ryan Holiday', note: 'Mindset de caverna' },
+    { title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', note: 'Leitura de pessoas e decisões' },
+  ],
+  done: []
+};
+
+const PODCASTS = {
+  week: [
+    { title: 'Nação Dopamina — Ep. 1', desc: 'Por que seu cérebro sabota você', ep: '🔥 Sugestão da semana', cat: 'semana' },
+    { title: 'The Tim Ferriss Show — Arnold Schwarzenegger', desc: 'Disciplina, foco e modo caverna real', ep: '🔥 Sugestão da semana', cat: 'semana' },
+  ],
+  vendas: [
+    { title: 'The Salesman Podcast', desc: 'Técnicas de vendas consultivas, SPIN e fechamento', ep: '', cat: 'vendas' },
+    { title: 'Spin Sucks Podcast', desc: 'Comunicação, storytelling e influência', ep: '', cat: 'vendas' },
+    { title: 'Talk Like TED', desc: 'Como os melhores palestrantes se comunicam', ep: '', cat: 'vendas' },
+  ],
+  negocios: [
+    { title: 'Flow Podcast', desc: 'Tecnologia, negócios e cultura BR', ep: '', cat: 'negocios' },
+    { title: 'How I Built This', desc: 'Histórias reais de fundadores — Guy Raz', ep: '', cat: 'negocios' },
+    { title: 'Masters of Scale', desc: 'Reid Hoffman — como escalar negócios', ep: '', cat: 'negocios' },
+    { title: '20VC', desc: 'Venture capital, startups e visão de longo prazo', ep: '', cat: 'negocios' },
+  ],
+  tech: [
+    { title: 'Lex Fridman Podcast', desc: 'IA, tecnologia e as mentes mais brilhantes do mundo', ep: '', cat: 'tech' },
+    { title: 'Hard Fork (NYT)', desc: 'Notícias de tech com análise profunda', ep: '', cat: 'tech' },
+  ],
+  mente: [
+    { title: 'Inteligência Ltda', desc: 'Psicologia, comportamento e autoconhecimento BR', ep: '', cat: 'mente' },
+    { title: 'Huberman Lab', desc: 'Neurociência aplicada — sono, foco, dopamina', ep: '', cat: 'mente' },
+  ]
+};
+
+// ===== STATE =====
+const today = new Date();
+const todayDow = today.getDay() === 0 ? 6 : today.getDay() - 1; // 0=seg, 6=dom
+
+let state = JSON.parse(localStorage.getItem('modocaverna') || 'null') || {
+  currentDay: todayDow,
+  week: 1,
+  days: Array(7).fill(null).map(() => ({})),
+  totalPtsAllTime: 0,
+  streak: 1,
+  booksRead: []
+};
+
+function save() { localStorage.setItem('modocaverna', JSON.stringify(state)); }
+
+// ===== HELPERS =====
+function getTasksForDay(dow) {
+  return TASKS_TEMPLATE.filter(t => {
+    if (t.days) return t.days.includes(dow);
+    if (t.skip) return !t.skip.includes(dow);
+    return true;
+  });
+}
+
+function getDayPts(dow) {
+  const tasks = getTasksForDay(dow);
+  const done = state.days[dow] || {};
+  let pts = 0;
+  let leituraBlocks = 0;
+  tasks.forEach(t => {
+    if (done[t.id]) {
+      if (t.id.startsWith('leitura')) {
+        leituraBlocks++;
+      } else {
+        pts += t.pts;
+      }
+    }
+  });
+  if (leituraBlocks >= 4) pts += 10;
+  else if (leituraBlocks >= 2) pts += leituraBlocks * 2.5;
+  return Math.round(pts);
+}
+
+function getWeekPts() {
+  return DAYS.reduce((sum, _, i) => sum + getDayPts(i), 0);
+}
+
+function getLevel(pts) {
+  if (pts >= 342) return { name: '🦅 CAVERNA', next: 380, threshold: 342 };
+  if (pts >= 323) return { name: '🧠 ESTRATEGISTA', next: 342, threshold: 323 };
+  if (pts >= 304) return { name: '⚔️ GUERREIRO', next: 323, threshold: 304 };
+  if (pts >= 266) return { name: '🪖 SOLDADO', next: 304, threshold: 266 };
+  return { name: '🌱 INICIANTE', next: 266, threshold: 0 };
+}
+
+// ===== RENDER =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function renderDaySelector() {
+  const el = document.getElementById('daySelector');
+  el.innerHTML = DAYS.map((d, i) => {
+    const pts = getDayPts(i);
+    const isActive = i === state.currentDay;
+    const hasPts = pts > 0;
+    return `<div class="day-btn ${isActive ? 'active' : ''} ${hasPts && !isActive ? 'completed' : ''}" onclick="selectDay(${i})">
+      <div class="day-name">${d}</div>
+      <div class="day-pts">${pts > 0 ? pts+'pt' : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTasks() {
+  const dow = state.currentDay;
+  const tasks = getTasksForDay(dow);
+  const done = state.days[dow] || {};
+  const blocks = {};
+  tasks.forEach(t => {
+    if (!blocks[t.block]) blocks[t.block] = [];
+    blocks[t.block].push(t);
+  });
+
+  // Day score
+  const pts = getDayPts(dow);
+  const maxPts = tasks.reduce((s, t) => {
+    if (t.id.startsWith('leitura')) return s;
+    return s + t.pts;
+  }, 10); // +10 for full leitura
+  const pct = Math.min(100, Math.round((pts / maxPts) * 100));
+
+  document.getElementById('dayScore').textContent = pts;
+  document.getElementById('dayMax').textContent = maxPts;
+  document.getElementById('ringPct').textContent = pct + '%';
+  const offset = 163 - (163 * pct / 100);
+  document.getElementById('ringCircle').style.strokeDashoffset = offset;
+
+  let html = '';
+  Object.entries(blocks).forEach(([block, btasks]) => {
+    html += `<div class="block-title">${block}</div>`;
+    btasks.forEach(t => {
+      const isDone = !!done[t.id];
+      let ptsLabel = '';
+      if (t.id.startsWith('leitura')) {
+        const blockNum = parseInt(t.id.replace('leitura',''));
+        ptsLabel = blockNum === 4 ? '+10pts total' : `bloco ${blockNum}/4`;
+      } else {
+        ptsLabel = t.pts > 0 ? `+${t.pts}` : '';
+      }
+      html += `<div class="task-item ${isDone ? 'done' : ''}" onclick="toggleTask('${t.id}')">
+        <div class="checkbox">${isDone ? '✓' : ''}</div>
+        <div class="task-info">
+          <div class="task-name">${t.emoji} ${t.name}</div>
+          <div class="task-meta">${t.meta}</div>
+        </div>
+        <div class="task-pts">${isDone ? (ptsLabel || '✓') : ptsLabel}</div>
+      </div>`;
+    });
+  });
+
+  document.getElementById('taskList').innerHTML = html;
+}
+
+function toggleTask(id) {
+  const dow = state.currentDay;
+  if (!state.days[dow]) state.days[dow] = {};
+  const was = state.days[dow][id];
+  state.days[dow][id] = !was;
+
+  // Special: leitura bonus
+  const task = TASKS_TEMPLATE.find(t => t.id === id);
+
+  save();
+  renderAll();
+
+  if (!was) {
+    const toasts = {
+      'milagre': '🌅 Milagre da Manhã concluído! +8pts',
+      'academia': '🏋️ Academia feita! +10pts 💪',
+      'familia': '👨‍👩‍👦 Família respeitada! +8pts',
+      'clean': '🧠 Dia limpo! +15pts 🔥',
+      'leitura4': '📚 2 horas de leitura! +10pts 🎯',
+      'debate': '🧠 Debate concluído! +10pts',
+      'planejamento': '📅 Semana planejada! +10pts',
+    };
+    if (toasts[id]) showToast(toasts[id]);
+    else if (id.startsWith('leitura')) {
+      const n = parseInt(id.replace('leitura',''));
+      showToast(`📖 Bloco ${n}/4 feito!`);
+    }
+  }
+}
+
+function renderWeek() {
+  // Grid
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = DAYS.map((d, i) => {
+    const pts = getDayPts(i);
+    return `<div class="week-day-cell ${pts > 0 ? 'has-pts' : ''}">
+      <div class="wdc-name">${d}</div>
+      <div class="wdc-pts">${pts > 0 ? pts : '—'}</div>
+    </div>`;
+  }).join('');
+
+  // Total
+  const weekPts = getWeekPts();
+  const level = getLevel(weekPts);
+  document.getElementById('weekTotalPts').textContent = weekPts;
+  document.getElementById('weekLevel').textContent = level.name;
+
+  const bar = Math.min(100, Math.round((weekPts / 380) * 100));
+  document.getElementById('weekBar').style.width = bar + '%';
+
+  const diff = level.next - weekPts;
+  const nextLevel = getLevel(level.next);
+  document.getElementById('weekNextLabel').innerHTML = diff > 0
+    ? `Faltam <span>${diff}</span> pts para ${nextLevel.name}`
+    : `<span>🎯 Nível máximo da semana!</span>`;
+
+  // Stats
+  let ac=0, lei=0, mil=0, fam=0, cle=0, pod=0;
+  for(let i=0;i<7;i++){
+    const d = state.days[i]||{};
+    if(d.academia) ac++;
+    if(d.leitura1&&d.leitura2&&d.leitura3&&d.leitura4) lei++;
+    if(d.milagre) mil++;
+    if(d.familia) fam++;
+    if(d.clean) cle++;
+    if(d.podcast) pod++;
+  }
+  document.getElementById('statAcademia').textContent = ac+'/6';
+  document.getElementById('statLeitura').textContent = lei+'/7';
+  document.getElementById('statMilagre').textContent = mil+'/7';
+  document.getElementById('statFamilia').textContent = fam+'/7';
+  document.getElementById('statClean').textContent = cle+'/7';
+  document.getElementById('statPodcast').textContent = pod+'/5';
+  document.getElementById('streakNum').textContent = state.streak;
+}
+
+function renderLevelBar() {
+  const weekPts = getWeekPts();
+  const level = getLevel(weekPts);
+  document.getElementById('levelName').textContent = level.name;
+  document.getElementById('totalPts').textContent = weekPts;
+  const pct = Math.min(100, Math.round(((weekPts - level.threshold) / (level.next - level.threshold)) * 100));
+  document.getElementById('levelBar').style.width = pct + '%';
+}
+
+function renderBooks() {
+  // Reading
+  const readEl = document.getElementById('bookReading');
+  readEl.innerHTML = BOOKS.reading.map(b => `
+    <div class="book-item reading">
+      <div class="book-num">→</div>
+      <div class="book-info">
+        <div class="book-title">${b.title}</div>
+        ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
+        <div class="book-tag reading">LENDO</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Queue
+  const queueEl = document.getElementById('bookQueue');
+  document.getElementById('bookQueueCount').textContent = BOOKS.queue.length + ' livros';
+  queueEl.innerHTML = BOOKS.queue.map((b, i) => `
+    <div class="book-item">
+      <div class="book-num">${i+1}</div>
+      <div class="book-info">
+        <div class="book-title">${b.title}</div>
+        ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
+        ${b.note ? `<div class="book-author" style="color:var(--gold);opacity:0.7;font-size:11px">${b.note}</div>` : ''}
+        <div class="book-tag next">PRÓXIMO</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Buy
+  const buyEl = document.getElementById('bookBuy');
+  buyEl.innerHTML = BOOKS.buy.map(b => `
+    <div class="book-item">
+      <div class="book-num">+</div>
+      <div class="book-info">
+        <div class="book-title">${b.title}</div>
+        <div class="book-author">${b.author}</div>
+        <div class="book-author" style="color:var(--green);opacity:0.7;font-size:11px">${b.note}</div>
+        <div class="book-tag buy">COMPRAR</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Done
+  const doneEl = document.getElementById('bookDone');
+  document.getElementById('bookDoneCount').textContent = BOOKS.done.length + ' livros';
+  if (BOOKS.done.length === 0) {
+    doneEl.innerHTML = '<div class="empty-state">Nenhum livro finalizado ainda.<br>Bora mudar isso. 📚</div>';
+  } else {
+    doneEl.innerHTML = BOOKS.done.map(b => `
+      <div class="book-item done-book">
+        <div class="book-num">✓</div>
+        <div class="book-info">
+          <div class="book-title">${b.title}</div>
+          ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
+          <div class="book-tag done-tag">LIDO</div>
+        </div>
+        <button class="book-quiz-btn">Quiz</button>
+      </div>
+    `).join('');
+  }
+}
+
+function renderPodcasts() {
+  const catClass = { semana:'cat-semana', vendas:'cat-vendas', negocios:'cat-negocios', tech:'cat-tech', mente:'cat-mente' };
+
+  function podHtml(arr) {
+    return arr.map(p => `
+      <div class="podcast-item">
+        <div class="podcast-top">
+          <div class="podcast-title">${p.title}</div>
+          <div class="podcast-category ${catClass[p.cat]}">${p.cat}</div>
+        </div>
+        <div class="podcast-desc">${p.desc}</div>
+        ${p.ep ? `<div class="podcast-ep">${p.ep}</div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('podcastWeek').innerHTML = podHtml(PODCASTS.week);
+  document.getElementById('podcastVendas').innerHTML = podHtml(PODCASTS.vendas);
+  document.getElementById('podcastNegocios').innerHTML = podHtml(PODCASTS.negocios);
+  document.getElementById('podcastTech').innerHTML = podHtml(PODCASTS.tech);
+  document.getElementById('podcastMente').innerHTML = podHtml(PODCASTS.mente);
+}
+
+function renderAll() {
+  renderLevelBar();
+  renderDaySelector();
+  renderTasks();
+  renderWeek();
+  renderBooks();
+  renderPodcasts();
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function selectDay(dow) {
+  state.currentDay = dow;
+  save();
+  renderDaySelector();
+  renderTasks();
+}
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>
