@@ -612,6 +612,32 @@
     text-transform: uppercase;
   }
 
+
+  /* EXPORT/IMPORT */
+  .backup-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .backup-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .backup-btn.export { border-color: var(--gold); color: var(--gold); }
+  .backup-btn.import { border-color: var(--blue); color: var(--blue); }
+
   /* FLOATING TOAST */
   .toast {
     position: fixed;
@@ -770,6 +796,12 @@
 
   <!-- SEMANA -->
   <div id="tab-semana" class="tab-panel">
+
+    <div class="backup-bar">
+      <div class="backup-btn export" onclick="exportData()">⬇️ Exportar progresso</div>
+      <div class="backup-btn import" onclick="document.getElementById('importFile').click()">⬆️ Importar progresso</div>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
 
     <div class="streak-banner">
       <div class="streak-fire">🔥</div>
@@ -1207,7 +1239,7 @@ function renderLevelBar() {
 function renderBooks() {
   // Reading
   const readEl = document.getElementById('bookReading');
-  readEl.innerHTML = BOOKS.reading.map(b => `
+  readEl.innerHTML = BOOKS.reading.map((b, i) => `
     <div class="book-item reading">
       <div class="book-num">→</div>
       <div class="book-info">
@@ -1215,6 +1247,7 @@ function renderBooks() {
         ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
         <div class="book-tag reading">LENDO</div>
       </div>
+      <button class="book-quiz-btn" style="background:var(--green)" onclick="markBookDone(${i}, 'reading')">✓ Lido</button>
     </div>
   `).join('');
 
@@ -1228,8 +1261,12 @@ function renderBooks() {
         <div class="book-title">${b.title}</div>
         ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
         ${b.note ? `<div class="book-author" style="color:var(--gold);opacity:0.7;font-size:11px">${b.note}</div>` : ''}
-        <div class="book-tag next">PRÓXIMO</div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+          <div class="book-tag next">PRÓXIMO</div>
+          ${i === 0 ? `<span style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(76,143,201,0.2);color:var(--blue);cursor:pointer;font-weight:600;letter-spacing:1px" onclick="startReading(${i})">▶ INICIAR</span>` : ''}
+        </div>
       </div>
+      <button class="book-quiz-btn" style="background:var(--green);font-size:10px;padding:5px 10px" onclick="markBookDone(${i}, 'queue')">✓ Lido</button>
     </div>
   `).join('');
 
@@ -1253,15 +1290,19 @@ function renderBooks() {
   if (BOOKS.done.length === 0) {
     doneEl.innerHTML = '<div class="empty-state">Nenhum livro finalizado ainda.<br>Bora mudar isso. 📚</div>';
   } else {
-    doneEl.innerHTML = BOOKS.done.map(b => `
+    doneEl.innerHTML = BOOKS.done.map((b, i) => `
       <div class="book-item done-book">
         <div class="book-num">✓</div>
         <div class="book-info">
           <div class="book-title">${b.title}</div>
           ${b.author ? `<div class="book-author">${b.author}</div>` : ''}
-          <div class="book-tag done-tag">LIDO</div>
+          ${b.doneDate ? `<div class="book-author" style="color:var(--green);font-size:11px">✓ Concluído em ${b.doneDate}</div>` : ''}
+          <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+            <div class="book-tag done-tag">LIDO ✓</div>
+            <span style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--text-dim);cursor:pointer;font-weight:600;letter-spacing:1px" onclick="undoBookDone(${i})">↩ desfazer</span>
+          </div>
         </div>
-        <button class="book-quiz-btn">Quiz</button>
+        <button class="book-quiz-btn">Quiz 🧠</button>
       </div>
     `).join('');
   }
@@ -1312,6 +1353,97 @@ function selectDay(dow) {
   save();
   renderDaySelector();
   renderTasks();
+}
+
+
+// ===== BOOK ACTIONS =====
+function markBookDone(idx, type) {
+  let book;
+  if (type === 'reading') { book = BOOKS.reading.splice(idx, 1)[0]; }
+  else if (type === 'queue') { book = BOOKS.queue.splice(idx, 1)[0]; }
+  if (book) {
+    book.doneDate = new Date().toLocaleDateString('pt-BR');
+    book.fromType = type;
+    BOOKS.done.unshift(book);
+    showToast('📚 "' + book.title.substring(0,22) + '" concluído! 🎉');
+    renderBooks();
+  }
+}
+
+function undoBookDone(idx) {
+  const book = BOOKS.done.splice(idx, 1)[0];
+  if (book) {
+    const from = book.fromType || 'queue';
+    delete book.doneDate;
+    delete book.fromType;
+    if (from === 'reading') { BOOKS.reading.push(book); }
+    else { BOOKS.queue.unshift(book); }
+    showToast('↩️ "' + book.title.substring(0,22) + '" desfeito');
+    renderBooks();
+  }
+}
+
+function startReading(idx) {
+  const book = BOOKS.queue.splice(idx, 1)[0];
+  if (book) {
+    BOOKS.reading.push(book);
+    showToast('📖 Começando: ' + book.title.substring(0,25));
+    renderBooks();
+  }
+}
+
+function undoBookDone(idx) {
+  const book = BOOKS.done.splice(idx, 1)[0];
+  if (book) {
+    delete book.doneDate;
+    BOOKS.queue.unshift(book);
+    showToast('↩️ "' + book.title.substring(0,22) + '" voltou pra fila');
+    renderBooks();
+  }
+}
+
+
+// ===== BACKUP =====
+function exportData() {
+  const data = {
+    state: state,
+    books: BOOKS,
+    exportDate: new Date().toLocaleDateString('pt-BR')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'caverna-backup-' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Progresso exportado!');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.state) {
+        state = data.state;
+        save();
+      }
+      if (data.books) {
+        BOOKS.reading = data.books.reading || BOOKS.reading;
+        BOOKS.queue = data.books.queue || BOOKS.queue;
+        BOOKS.buy = data.books.buy || BOOKS.buy;
+        BOOKS.done = data.books.done || [];
+      }
+      renderAll();
+      showToast('✅ Progresso restaurado!');
+    } catch(err) {
+      showToast('❌ Arquivo inválido');
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ===== INIT =====
